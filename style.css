@@ -1,0 +1,286 @@
+/* Reset and base styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Essential dark theme colors */
+:root {
+    --bg-color: #0f1117;
+    --card-bg: #171923;
+    --primary-blue: #4682B4;
+    --text-color: #ffffff;
+    --text-secondary: rgba(255, 255, 255, 0.6);
+    --input-bg: #1f2635;
+    --input-border: #2c3142;
+}
+
+/* Main background */
+.main, .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"] {
+    background-color: var(--bg-color) !important;
+}
+
+/* Remove all Streamlit styling */
+#MainMenu, footer, header {
+    visibility: hidden !important;
+    display: none !important;
+}
+
+.stDeployButton, [data-testid="stToolbar"], [data-testid="baseButton-headerNoPadding"] {
+    display: none !important;
+}
+
+/* Container styling */
+.main .block-container {
+    padding: 1rem 1rem 3rem !important;
+    max-width: 100% !important;
+}
+
+/* Title and heading styling */
+h1, [data-testid="stMarkdown"] h1 {
+    color: var(--text-color) !important;
+    font-weight: 600 !important;
+    font-size: 1.5rem !important;
+    text-align: center !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+}
+
+h2, h3, h4, h5, h6, [data-testid="stMarkdown"] p, [data-testid="stMarkdown"] div {
+    color: var(--text-secondary) !important;
+    text-align: center !important;
+}
+
+[data-testid="stSidebar"] h1, [data-testid="stSidebar"] h2, [data-testid="stSidebar"] h3 {
+    text-align: left !important;
+}
+
+/* Text input styling */
+[data-testid="stTextInput"] > label {
+    color: var(--text-color) !important;
+    font-size: 0.9rem !important;
+    font-weight: 500 !important;
+    margin-bottom: 0.5rem !important;
+}
+
+[data-testid="stTextInput"] > div > div:first-child {
+    border: none !important;
+    background-color: var(--input-bg) !important;
+    border-radius: 4px !important;
+}
+
+[data-testid="stTextInput"] > div > div > input {
+    color: var(--text-color) !important;
+    background-color: var(--input-bg) !important;
+    border: none !important;
+    font-size: 0.95rem !important;
+    padding: 12px !important;
+    height: 44px !important;
+    border-radius: 4px !important;
+}
+
+/* Password field styling */
+[data-testid="stTextInput"][type="password"] input {
+    letter-spacing: 0.1em;
+}
+
+[data-testid="InputInstructions"] {
+    display: none !important;
+}
+
+/* Button styling */
+.stButton > button {
+    background-color: var(--primary-blue) !important;
+    color: white !important;
+    border: none !important;
+    padding: 12px !important;
+    font-size: 0.95rem !important;
+    font-weight: 500 !important;
+    border-radius: 4px !important;
+    width: 100% !important;
+    cursor: pointer !important;
+    margin-top: 0.5rem !important;
+    margin-bottom: 0.5rem !important;
+    transition: background-color 0.2s ease !important;
+}
+
+.stButton > button:hover {
+    background-color: #3a6d96 !important;
+}
+
+/* Registration/login toggle buttons styling */
+button[key="to_register"], button[key="to_login"] {
+    background-color: transparent !important;
+    color: var(--primary-blue) !important;
+    border: 1px solid var(--primary-blue) !important;
+    margin-top: 0.5rem !important;
+}
+
+/* Centering div for bread icon */
+div[style*="display: flex; justify-content: center"] {
+    margin-top: 2rem !important;
+    margin-bottom: 1rem !important;
+}
+
+/* Login/register form container */
+[data-testid="stForm"], form {
+    background-color: var(--card-bg) !important;
+    padding: 1.5rem !important;
+    border-radius: 8px !important;
+    margin-bottom: 1rem !important;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}
+
+/* Divider line styling */
+hr {
+    border-color: var(--input-border) !important;
+    margin: 1.5rem 0 !important;
+}
+
+/* Center text dividers */
+div[style*="text-align: center"] {
+    color: var(--text-secondary) !important;
+    margin: 1rem 0 0.5rem !important;
+    font-size: 0.9rem !important;
+}
+
+/* Expander styling */
+.streamlit-expanderHeader {
+    background-color: var(--card-bg) !important;
+    color: var(--text-secondary) !important;
+    font-size: 0.9rem !important;
+    padding: 0.75rem 1rem !important;
+    border-radius: 4px !important;
+    margin-top: 1rem !important;
+}
+
+.streamlit-expanderContent {
+    background-color: var(--card-bg) !important;
+    border-top: 1px solid var(--input-border) !important;
+    padding: 1rem !important;
+}
+
+/* Notifications styling */
+[data-baseweb="notification"] {
+    background-color: var(--card-bg) !important;
+    border-radius: 4px !important;
+    margin: 0.5rem 0 1rem !important;
+}
+
+/* Error message */
+[data-baseweb="notification"][kind="error"] {
+    border-left: 4px solid #ff4d4f !important;
+}
+
+/* Success message */
+[data-baseweb="notification"][kind="success"] {
+    border-left: 4px solid #52c41a !important;
+}
+
+/* Info boxes */
+.element-container .stAlert {
+    background-color: var(--card-bg) !important;
+    color: var(--text-secondary) !important;
+    border: none !important;
+    padding: 0.75rem !important;
+    border-radius: 4px !important;
+    margin-bottom: 0.75rem !important;
+}
+
+/* Password visibility toggle button */
+button[kind="icon"] {
+    color: var(--text-secondary) !important;
+    background-color: transparent !important;
+    border: none !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Icons */
+[data-testid="stImage"] {
+    margin: 0 auto !important;
+    display: block !important;
+}
+
+/* Lists inside expanders */
+.streamlit-expanderContent ul, .streamlit-expanderContent ol {
+    margin-left: 1.5rem !important;
+    color: var(--text-secondary) !important;
+}
+
+.streamlit-expanderContent li {
+    margin-bottom: 0.5rem !important;
+}
+
+/* Toast notifications */
+[class*="toastContainer"] {
+    bottom: 3.5rem !important;
+}
+
+/* For authenticated pages styling */
+[data-testid="stSidebar"] {
+    background-color: var(--card-bg) !important;
+    border-right: 1px solid var(--input-border) !important;
+}
+
+[data-testid="stSidebar"] [data-testid="stVerticalBlock"] {
+    padding-top: 1rem !important;
+}
+
+/* Radio buttons */
+.stRadio > div {
+    margin-top: 0.5rem !important;
+}
+
+.stRadio > div > div > label {
+    color: var(--text-color) !important;
+}
+
+/* Data editor/tables */
+[data-testid="stDataFrame"] {
+    background-color: var(--card-bg) !important;
+    border-radius: 4px !important;
+}
+
+[data-testid="stDataFrame"] th {
+    background-color: var(--input-bg) !important;
+    color: var(--text-color) !important;
+    font-weight: 500 !important;
+    border-bottom: 1px solid var(--input-border) !important;
+}
+
+[data-testid="stDataFrame"] td {
+    color: var(--text-secondary) !important;
+    border-bottom: 1px solid var(--input-border) !important;
+}
+
+.stDeckGlJsonChart canvas {
+    border-radius: 4px !important;
+}
+
+/* Metrics */
+[data-testid="stMetricValue"] {
+    color: var(--primary-blue) !important;
+    font-weight: 600 !important;
+}
+
+[data-testid="stMetricLabel"] {
+    color: var(--text-secondary) !important;
+}
+
+/* Media query for mobile optimization */
+@media screen and (max-width: 768px) {
+    .main .block-container {
+        padding: 1rem 0.5rem 3rem !important;
+    }
+    
+    [data-testid="stForm"], form {
+        padding: 1rem !important;
+    }
+    
+    h1, [data-testid="stMarkdown"] h1 {
+        font-size: 1.3rem !important;
+    }
+} 
