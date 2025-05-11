@@ -1,4 +1,11 @@
 streamlit==1.23.1
 pandas==2.0.2
-pyrebase4==4.6.0
-python-dotenv==1.0.0 
+numpy==1.26.4
+python-dotenv==1.0.0
+Pillow==9.5.0
+protobuf==4.25.7
+pytz==2024.2
+tzlocal==4.3.1
+validators==0.35.0
+importlib-metadata==6.11.0
+tenacity==8.5.0 

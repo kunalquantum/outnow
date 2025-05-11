@@ -74,28 +74,6 @@ def load_css():
 if os.path.exists("style.css"):
     load_css()
 
-# Initialize session state variables
-if 'admin_data' not in st.session_state:
-    st.session_state.admin_data = load_admin_data() or default_admin_data
-    if not load_admin_data():
-        save_admin_data(default_admin_data)
-    
-if 'worker_data' not in st.session_state:
-    st.session_state.worker_data = load_worker_data() or []
-    
-if 'date_filter' not in st.session_state:
-    st.session_state.date_filter = str(date.today())
-
-# Initialize user authentication variables
-if 'authenticated' not in st.session_state:
-    st.session_state.authenticated = False
-    
-if 'username' not in st.session_state:
-    st.session_state.username = ""
-    
-if 'user_role' not in st.session_state:
-    st.session_state.user_role = ""
-
 # Initialize data with pre-populated admin data if none exists
 default_admin_data = [
     {"SR.NO": 1, "SKU NAME": "LARGE 350", "AW RATE": 31.75, "DIFF1": 2.05, "DEL.B.RATE": 33.80, "DIFF2": 1.45, "RETAILOR RATE": 35.25, "JALI": 35, "JALI QUA": 24, "TOTAL QUA": 840},
@@ -130,6 +108,28 @@ default_admin_data = [
     {"SR.NO": 30, "SKU NAME": "M.BUN", "AW RATE": 14.00, "DIFF1": 1.00, "DEL.B.RATE": 15.00, "DIFF2": 2.00, "RETAILOR RATE": 17.00, "JALI": 0, "JALI QUA": 1, "TOTAL QUA": 0},
     {"SR.NO": 31, "SKU NAME": "SLICE", "AW RATE": 7.00, "DIFF1": 0.80, "DEL.B.RATE": 7.80, "DIFF2": 1.20, "RETAILOR RATE": 9.00, "JALI": 70, "JALI QUA": 1, "TOTAL QUA": 70}
 ]
+
+# Initialize session state variables
+if 'admin_data' not in st.session_state:
+    st.session_state.admin_data = load_admin_data() or default_admin_data
+    if not load_admin_data():
+        save_admin_data(default_admin_data)
+    
+if 'worker_data' not in st.session_state:
+    st.session_state.worker_data = load_worker_data() or []
+    
+if 'date_filter' not in st.session_state:
+    st.session_state.date_filter = str(date.today())
+
+# Initialize user authentication variables
+if 'authenticated' not in st.session_state:
+    st.session_state.authenticated = False
+    
+if 'username' not in st.session_state:
+    st.session_state.username = ""
+    
+if 'user_role' not in st.session_state:
+    st.session_state.user_role = ""
 
 # Authentication Function
 def authenticate(username, password):
@@ -505,8 +505,17 @@ else:
         
         # Option to filter by product name for easier mobile navigation
         search_term = st.text_input("Search Product", placeholder="Type to filter products...")
+        
+        # Option to hide products with zero SKU
+        hide_zero_sku = st.checkbox("Hide products with zero SKU", value=True)
+        
+        # Apply filters
+        filtered_df = df.copy()
         if search_term:
-            df = df[df["SKU NAME"].str.contains(search_term, case=False)]
+            filtered_df = filtered_df[filtered_df["SKU NAME"].str.contains(search_term, case=False)]
+        
+        if hide_zero_sku:
+            filtered_df = filtered_df[filtered_df["SKU"] > 0]
         
         # Configure columns for the editable table - simplified for mobile
         column_config = {
@@ -520,56 +529,79 @@ else:
             "ORDER": st.column_config.NumberColumn("ORDER", min_value=0, step=1, format="%d"),
         }
         
-        # Create the data editor - with options friendly for mobile
-        edited_df = st.data_editor(
-            df,
-            column_config=column_config,
-            use_container_width=True,
-            hide_index=True,
-            num_rows="fixed",
-            column_order=["SKU NAME", "SKU", "MR", "SALE", "AMOUNT", "RCENTA", "ORDER"],
-            key="worker_editor"
-        )
+        # Check if the filtered dataframe is not empty
+        if not filtered_df.empty:
+            # Create the data editor - with options friendly for mobile
+            edited_df = st.data_editor(
+                filtered_df,
+                column_config=column_config,
+                use_container_width=True,
+                hide_index=True,
+                num_rows="fixed",
+                column_order=["SKU NAME", "SKU", "MR", "SALE", "AMOUNT", "RCENTA", "ORDER"],
+                key="worker_editor"
+            )
+            
+            # Get the values from the filtered dataframe that may have been edited
+            # and update them in the original dataframe
+            for idx, row in edited_df.iterrows():
+                sku_name = row["SKU NAME"]
+                matching_idx = df[df["SKU NAME"] == sku_name].index
+                if not matching_idx.empty:
+                    df.loc[matching_idx, "SKU"] = row["SKU"]
+                    df.loc[matching_idx, "MR"] = row["MR"]
+                    df.loc[matching_idx, "ORDER"] = row["ORDER"]
+        else:
+            st.warning("No products found with current filters. Try adjusting your search or uncheck 'Hide products with zero SKU'.")
         
         # Button to calculate and save the data
         if st.button("Calculate & Save", use_container_width=True):
             # Create a copy to process and save
-            processed_df = edited_df.copy()
+            processed_df = df.copy()
             
-            # Calculate the derived fields
+            # Validate that MR doesn't exceed SKU
+            invalid_rows = []
             for idx, row in processed_df.iterrows():
-                # Calculate SALE automatically as SKU - MR
-                processed_df.at[idx, "SALE"] = max(0, row["SKU"] - row["MR"])
-                
-                # Get rate for this SKU
-                sku_rate = retail_rates.get(row["SKU NAME"], 0)
-                
-                # Calculate AMOUNT based on auto-calculated SALE
-                processed_df.at[idx, "AMOUNT"] = processed_df.at[idx, "SALE"] * sku_rate
-                
-                # Calculate RCENTA (return percentage)
-                if row["SKU"] > 0:
-                    processed_df.at[idx, "RCENTA"] = (row["MR"] / row["SKU"]) * 100
-                else:
-                    processed_df.at[idx, "RCENTA"] = 0
+                if row["MR"] > row["SKU"]:
+                    invalid_rows.append(row["SKU NAME"])
                     
-                # Set FR to 0 as it's no longer used
-                processed_df.at[idx, "FR"] = 0
-            
-            # Update session state and save to database
-            # First, remove existing entries for this date
-            updated_worker_data = [item for item in st.session_state.worker_data 
-                                 if item.get("DATE") != st.session_state.date_filter]
-            
-            # Add the updated entries
-            updated_worker_data.extend(processed_df.to_dict('records'))
-            
-            # Save to session state and database
-            st.session_state.worker_data = updated_worker_data
-            save_worker_data(updated_worker_data)
-            
-            st.success("Data calculated and saved successfully!")
-            st.experimental_rerun()
+            if invalid_rows:
+                st.error(f"Market Returns (MR) cannot exceed SKU for: {', '.join(invalid_rows)}")
+            else:
+                # Calculate the derived fields
+                for idx, row in processed_df.iterrows():
+                    # Calculate SALE automatically as SKU - MR
+                    processed_df.at[idx, "SALE"] = max(0, row["SKU"] - row["MR"])
+                    
+                    # Get rate for this SKU
+                    sku_rate = retail_rates.get(row["SKU NAME"], 0)
+                    
+                    # Calculate AMOUNT based on auto-calculated SALE
+                    processed_df.at[idx, "AMOUNT"] = processed_df.at[idx, "SALE"] * sku_rate
+                    
+                    # Calculate RCENTA (return percentage)
+                    if row["SKU"] > 0:
+                        processed_df.at[idx, "RCENTA"] = (row["MR"] / row["SKU"]) * 100
+                    else:
+                        processed_df.at[idx, "RCENTA"] = 0
+                        
+                    # Set FR to 0 as it's no longer used
+                    processed_df.at[idx, "FR"] = 0
+                
+                # Update session state and save to database
+                # First, remove existing entries for this date
+                updated_worker_data = [item for item in st.session_state.worker_data 
+                                     if item.get("DATE") != st.session_state.date_filter]
+                
+                # Add the updated entries
+                updated_worker_data.extend(processed_df.to_dict('records'))
+                
+                # Save to session state and database
+                st.session_state.worker_data = updated_worker_data
+                save_worker_data(updated_worker_data)
+                
+                st.success("Data calculated and saved successfully!")
+                st.experimental_rerun()
         
         # Display totals in a collapsible section to save space on mobile
         if not df.empty:
@@ -970,7 +1002,7 @@ else:
             
             # Calculate average return percentage
             total_sku = df["SKU"].sum() if "SKU" in df.columns else 0
-            total_returns = df["MR"].sum() + df["FR"].sum() if "MR" in df.columns and "FR" in df.columns else 0
+            total_returns = df["MR"].sum() if "MR" in df.columns else 0
             
             avg_return_percentage = (total_returns / total_sku * 100) if total_sku > 0 else 0
             
@@ -989,7 +1021,6 @@ else:
             sku_performance = df.groupby("SKU NAME").agg({
                 "SKU": "sum",
                 "MR": "sum",
-                "FR": "sum",
                 "SALE": "sum",
                 "AMOUNT": "sum"
             }).reset_index()
@@ -1000,8 +1031,7 @@ else:
             
             # Calculate return percentages
             sku_performance["Return %"] = (
-                (sku_performance["MR"] + sku_performance["FR"]) / 
-                sku_performance["SKU"] * 100
+                sku_performance["MR"] / sku_performance["SKU"] * 100
             ).apply(format_percentage)
             
             # Format currency columns
