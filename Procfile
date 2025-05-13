@@ -1,0 +1,1 @@
+web: pip install --only-binary=:all: pillow==9.5.0 && pip install -r requirements.txt && streamlit run app.py 
