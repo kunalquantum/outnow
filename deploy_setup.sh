@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Install Pillow from binary wheel
-pip install --only-binary=:all: pillow==9.5.0
+pip install --only-binary=:all: pillow
 
 # Install the rest of the requirements
 pip install -r streamlit_requirements.txt
