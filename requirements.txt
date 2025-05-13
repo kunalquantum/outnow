@@ -8,6 +8,6 @@ tzlocal==4.3.1
 validators==0.35.0
 importlib-metadata==6.11.0
 tenacity==8.5.0
-pillow==9.5.0
+opencv-python-headless==4.6.0.66
 pyarrow==20.0.0
 watchdog==6.0.0 
